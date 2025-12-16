@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc && cp dist/client.js public/client.js",
+    "bundle_client": "npx esbuild src/client.ts --bundle --outdir=dist --format=esm && cp dist/client.js public/client.js",
     "start": "node dist/server.js"
   },
   "dependencies": {

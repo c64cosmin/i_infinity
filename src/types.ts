@@ -1,0 +1,212 @@
+export class Grid {
+    private tiles: Tile[][] = []
+
+    constructor(public x: number, public y: number){
+        for (let j = 0; j < y; j++){
+            let v = []
+            for (let i = 0; i < x; i++){
+                let n = (Math.random() < 0.5);
+                let s = (Math.random() < 0.5);
+                let w = (Math.random() < 0.5);
+                let e = (Math.random() < 0.5);
+                v.push(new Tile(i, j, [e, s, w, n]));
+            }
+            this.tiles.push(v)
+        }
+    }
+
+    public draw(ctx: CanvasRenderingContext2D){
+        for (let j = 0; j < this.y; j++){
+            for (let i = 0; i < this.x; i++){
+                this.tiles[i][j].draw(ctx);
+            }
+        }
+    }
+}
+
+export class Tile {
+    public static readonly squareSize: number = 64;
+    public static readonly lineWidth: number = 7;
+    public rotation: number = 0;
+    //directions follow the cartesian coordinates
+    //directions[0] mean the positive x axis
+    //directions[1] mean the positive y axis
+    //they all go clockwise as the xy coordinates on screen
+
+    constructor(public x: number, public y:number, public directions: boolean[]){
+        this.rotation = 1
+    }
+
+    public rotate(times: number){
+        this.rotation = (this.rotation + times) % 4;
+    }
+
+    public draw(ctx: CanvasRenderingContext2D){
+        if(!this.tileExists()){
+            return;
+        }
+        ctx.fillStyle = this.getColor();
+        const s = Tile.squareSize;
+        ctx.fillRect(this.x * s, this.y * s, s, s);
+        if(this.tileHorizontal()){
+            this.drawHorizontal(ctx);
+        }
+        else if(this.tileVertical()){
+            this.drawVertical(ctx);
+        }
+        else if(this.tileEnd()){
+            this.drawEnd(ctx);
+        }
+        else{
+            this.drawCorners(ctx);
+        }
+    }
+
+    getColor(): string {
+        const hue = ((this.x + this.y) % 2) * 15 + 220;
+        return `hsl(${hue}, 70%, 80%)`;
+    }
+
+    drawEnd(ctx: CanvasRenderingContext2D) {
+        this.drawLine(ctx, (this.getTileEnd() - this.rotation + 4) % 4);
+        this.drawCircle(ctx);
+    }
+    
+    drawCorners(ctx: CanvasRenderingContext2D) {
+        for (let n = 0; n < 4; n++){
+            let i = (n - this.rotation + 4) % 4;
+            let j = (i + 1) % 4;
+            if(this.directions[i] && this.directions[j]){
+                this.drawCorner(ctx, n);
+            }
+        }
+    }
+
+    drawCorner(ctx: CanvasRenderingContext2D, index: number) {
+        const o_x = [1, 0, 0, 1];
+        const o_y = [1, 1, 0, 0];
+        const s = Tile.squareSize;
+        const c_x = s * o_x[index] + this.x * s;
+        const c_y = s * o_y[index] + this.y * s;
+        const arc_s = (index + 2) * Math.PI / 2;
+        const arc_e = (index + 3) * Math.PI / 2;
+        ctx.beginPath();
+        ctx.arc(c_x, c_y, s / 2, arc_s, arc_e);
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = Tile.lineWidth;
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    drawCircle(ctx: CanvasRenderingContext2D) {
+        const s = Tile.squareSize;
+        const pos_x = s * this.x;
+        const pos_y = s * this.y;
+        const c_x = pos_x + s / 2;
+        const c_y = pos_y + s / 2;
+        ctx.beginPath();
+        ctx.arc(c_x, c_y, s * 0.3, 0, Math.PI * 2); // full circle
+        ctx.fillStyle = "blue";
+        ctx.fill();
+        ctx.closePath();
+        ctx.beginPath();
+        ctx.arc(c_x, c_y, s * 0.3 - Tile.lineWidth, 0, Math.PI * 2); // full circle
+        ctx.fillStyle = "white";
+        ctx.fill();
+        ctx.closePath();
+    }
+
+    drawLine(ctx: CanvasRenderingContext2D, index: number) {
+        const o_x = [1, 0,-1, 0];
+        const o_y = [0, 1, 0,-1];
+        const s = Tile.squareSize;
+        const pos_x = s * this.x;
+        const pos_y = s * this.y;
+        const c_x = pos_x + s / 2;
+        const c_y = pos_y + s / 2;
+        ctx.beginPath();
+        ctx.moveTo(c_x, c_y);
+        ctx.lineTo(c_x + o_x[index] * s/2, c_y + o_y[index] * s/2);
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = Tile.lineWidth;
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    private drawHorizontal(ctx: CanvasRenderingContext2D){
+        const s = Tile.squareSize;
+        const pos_x = s * this.x;
+        const pos_y = s * this.y;
+        const c_x = pos_x + s / 2;
+        const c_y = pos_y + s / 2;
+        ctx.beginPath();
+        ctx.moveTo(c_x - s/2, c_y);
+        ctx.lineTo(c_x + s/2, c_y);
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = Tile.lineWidth;
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    private drawVertical(ctx: CanvasRenderingContext2D){
+        const s = Tile.squareSize;
+        const pos_x = s * this.x;
+        const pos_y = s * this.y;
+        const c_x = pos_x + s / 2;
+        const c_y = pos_y + s / 2;
+        ctx.beginPath();
+        ctx.moveTo(c_x, c_y - s/2);
+        ctx.lineTo(c_x, c_y + s/2);
+        ctx.strokeStyle = "blue";
+        ctx.lineWidth = Tile.lineWidth;
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    private tileExists(): boolean{
+        return this.directions[0] || this.directions[1] || this.directions[2] || this.directions[3];
+    }
+
+    private tileEnd(): boolean{
+        let count = 0;
+        for (let i = 0; i < 4; i++){
+            if(this.directions[i]){
+                count += 1;
+                if(count >= 2){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private getTileEnd(): number{
+        for (let i = 0; i < 4; i++){
+            if(this.directions[i]){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private tileHorizontal(): boolean{
+        var o = [true, false, true, false];
+        for(let i = 0; i < 4; i++){
+            if((this.directions[(i-this.rotation + 4) % 4] ^ o[i])){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private tileVertical(): boolean{
+        var o = [false, true, false, true];
+        for(let i = 0; i < 4; i++){
+            if((this.directions[(i-this.rotation + 4) % 4] ^ o[i])){
+                return false;
+            }
+        }
+        return true;
+    }
+};
+
