@@ -1,0 +1,698 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Flow challenge API",
+    "description": "Rest API to control the flow challenge.",
+    "version": "0.1.0"
+  },
+  "components": {
+    "schemas": {}
+  },
+  "paths": {
+    "/api/games": {
+      "get": {
+        "operationId": "listGames",
+        "tags": [
+          "api"
+        ],
+        "description": "List all games",
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "createGame",
+        "tags": [
+          "api"
+        ],
+        "description": "Create a new game",
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}": {
+      "get": {
+        "operationId": "getGame",
+        "tags": [
+          "api"
+        ],
+        "description": "Get a game by ID",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "gameId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "isDone": {
+                      "type": "boolean"
+                    },
+                    "levelIndex": {
+                      "type": "number"
+                    },
+                    "numberOfLevels": {
+                      "type": "number"
+                    },
+                    "board": {
+                      "type": "object",
+                      "properties": {
+                        "numberOfColumns": {
+                          "type": "number"
+                        },
+                        "squares": {
+                          "type": "array",
+                          "items": {
+                            "allOf": [
+                              {
+                                "type": "object",
+                                "properties": {
+                                  "id": {
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "id"
+                                ]
+                              },
+                              {
+                                "anyOf": [
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string",
+                                        "enum": [
+                                          "pipe"
+                                        ]
+                                      },
+                                      "position": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-1"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-2"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "position"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string",
+                                        "enum": [
+                                          "corner"
+                                        ]
+                                      },
+                                      "position": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-1"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-2"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-3"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-4"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "position"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string",
+                                        "enum": [
+                                          "tee"
+                                        ]
+                                      },
+                                      "position": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-1"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-2"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-3"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-4"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "position"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string",
+                                        "enum": [
+                                          "cross"
+                                        ]
+                                      },
+                                      "position": {
+                                        "type": "string",
+                                        "enum": [
+                                          "pos-1"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "position"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string",
+                                        "enum": [
+                                          "sink"
+                                        ]
+                                      },
+                                      "position": {
+                                        "anyOf": [
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-1"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-2"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-3"
+                                            ]
+                                          },
+                                          {
+                                            "type": "string",
+                                            "enum": [
+                                              "pos-4"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "position"
+                                    ]
+                                  },
+                                  {
+                                    "type": "object",
+                                    "properties": {
+                                      "name": {
+                                        "type": "string",
+                                        "enum": [
+                                          "blank"
+                                        ]
+                                      },
+                                      "position": {
+                                        "type": "string",
+                                        "enum": [
+                                          "pos-1"
+                                        ]
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "position"
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "numberOfColumns",
+                        "squares"
+                      ]
+                    },
+                    "stats": {
+                      "type": "object",
+                      "properties": {
+                        "startedAt": {
+                          "type": "number"
+                        },
+                        "finishedAt": {
+                          "anyOf": [
+                            {
+                              "type": "number"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "numberOfMoves": {
+                          "type": "number"
+                        },
+                        "numberOfWrongAttempts": {
+                          "type": "number"
+                        }
+                      },
+                      "required": [
+                        "startedAt",
+                        "finishedAt",
+                        "numberOfMoves",
+                        "numberOfWrongAttempts"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "isDone",
+                    "levelIndex",
+                    "numberOfLevels",
+                    "board",
+                    "stats"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/next-level": {
+      "post": {
+        "operationId": "nextLevel",
+        "tags": [
+          "api"
+        ],
+        "description": "Validate current level on go to the next one",
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "gameId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/games/{gameId}/squares/{squareId}/update-position": {
+      "post": {
+        "operationId": "updateSquarePosition",
+        "tags": [
+          "api"
+        ],
+        "description": "Update a square's position",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "position": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "pos-1"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "pos-2"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "pos-3"
+                        ]
+                      },
+                      {
+                        "type": "string",
+                        "enum": [
+                          "pos-4"
+                        ]
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "position"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "gameId",
+            "required": true
+          },
+          {
+            "schema": {
+              "type": "string"
+            },
+            "in": "path",
+            "name": "squareId",
+            "required": true
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Default Response"
+          }
+        }
+      }
+    },
+    "/api/config": {
+      "get": {
+        "operationId": "getConfig",
+        "tags": [
+          "api"
+        ],
+        "description": "Get game configuration",
+        "responses": {
+          "200": {
+            "description": "Default Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": [
+                    {
+                      "name": "blank",
+                      "positions": [
+                        {
+                          "name": "pos-1",
+                          "value": [
+                            false,
+                            false,
+                            false,
+                            false
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "sink",
+                      "positions": [
+                        {
+                          "name": "pos-1",
+                          "value": [
+                            true,
+                            false,
+                            false,
+                            false
+                          ]
+                        },
+                        {
+                          "name": "pos-2",
+                          "value": [
+                            false,
+                            true,
+                            false,
+                            false
+                          ]
+                        },
+                        {
+                          "name": "pos-3",
+                          "value": [
+                            false,
+                            false,
+                            true,
+                            false
+                          ]
+                        },
+                        {
+                          "name": "pos-4",
+                          "value": [
+                            false,
+                            false,
+                            false,
+                            true
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "pipe",
+                      "positions": [
+                        {
+                          "name": "pos-1",
+                          "value": [
+                            true,
+                            false,
+                            true,
+                            false
+                          ]
+                        },
+                        {
+                          "name": "pos-2",
+                          "value": [
+                            false,
+                            true,
+                            false,
+                            true
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "corner",
+                      "positions": [
+                        {
+                          "name": "pos-1",
+                          "value": [
+                            true,
+                            true,
+                            false,
+                            false
+                          ]
+                        },
+                        {
+                          "name": "pos-2",
+                          "value": [
+                            false,
+                            true,
+                            true,
+                            false
+                          ]
+                        },
+                        {
+                          "name": "pos-3",
+                          "value": [
+                            false,
+                            false,
+                            true,
+                            true
+                          ]
+                        },
+                        {
+                          "name": "pos-4",
+                          "value": [
+                            true,
+                            false,
+                            false,
+                            true
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "tee",
+                      "positions": [
+                        {
+                          "name": "pos-1",
+                          "value": [
+                            true,
+                            true,
+                            true,
+                            false
+                          ]
+                        },
+                        {
+                          "name": "pos-2",
+                          "value": [
+                            false,
+                            true,
+                            true,
+                            true
+                          ]
+                        },
+                        {
+                          "name": "pos-3",
+                          "value": [
+                            true,
+                            false,
+                            true,
+                            true
+                          ]
+                        },
+                        {
+                          "name": "pos-4",
+                          "value": [
+                            true,
+                            true,
+                            false,
+                            true
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "cross",
+                      "positions": [
+                        {
+                          "name": "pos-1",
+                          "value": [
+                            true,
+                            true,
+                            true,
+                            true
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://freely-refined-octopus.ngrok-free.app",
+      "description": "Server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "api",
+      "description": "Routes available to solve the challenge"
+    }
+  ]
+}
