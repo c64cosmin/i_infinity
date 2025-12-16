@@ -1,40 +1,31 @@
-import { Grid } from "./types";
+import { Tile, Grid } from "./types";
 
 Math.fmod = function (a,b) { return Number((a - (Math.floor(a / b) * b)).toPrecision(8)); };
 
-type ApiResponse = {
-  message: string;
-  timestamp: string;
-};
-
 async function loadData() {
-  const res = await fetch("/api/data");
-  const data: ApiResponse = await res.json();
+    const res = await fetch("/game/table/5");
+    const data: any = await res.json();
 
-  const output = document.getElementById("output");
-  if (output) {
-    output.textContent = JSON.stringify(data, null, 2);
-  }
+    const output = document.getElementById("output");
+    if (output) {
+        output.textContent = "";
+
+        const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+        const ctx = canvas.getContext("2d");
+
+        if (!ctx) {
+            throw new Error("Canvas not supported");
+        }
+
+        let grid = new Grid(data);
+
+        // resize canvas to fit grid
+        canvas.width = data.width * Tile.squareSize;
+        canvas.height = data.height * Tile.squareSize;
+
+        grid.draw(ctx);
+    }
 }
 
 loadData();
 
-const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-const ctx = canvas.getContext("2d");
-
-if (!ctx) {
-  throw new Error("Canvas not supported");
-}
-
-// configurable
-const squareSize = 100;
-const rows = 10;
-const cols = 10;
-
-let grid = new Grid(cols, rows);
-
-// resize canvas to fit grid
-canvas.width = cols * squareSize;
-canvas.height = rows * squareSize;
-
-grid.draw(ctx);
