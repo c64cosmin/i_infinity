@@ -10,7 +10,8 @@ export class Grid {
         for (let j = 0; j < this.y; j++){
             let v = []
             for (let i = 0; i < this.x; i++){
-                let t = new Tile(i, j, data.tiles[i][j]);
+                let tile = data.tiles[j][i];
+                let t = new Tile(i, j, tile.config);
                 t.grid = this;
                 v.push(t);
             }
@@ -28,9 +29,67 @@ export class Grid {
     public draw(ctx: CanvasRenderingContext2D){
         for (let j = 0; j < this.y; j++){
             for (let i = 0; i < this.x; i++){
-                this.tiles[i][j].draw(ctx);
+                this.tiles[j][i].draw(ctx);
             }
         }
+    }
+    public moves: any[] = [];
+    public solved = false;
+
+    public solve(pos_x: number, pos_y: number){
+        if(this.solved){
+            return;
+        }
+        let cell = this.getCell(pos_x, pos_y);
+        if(cell === null){
+            return;
+        }
+        if(cell.visited){
+            return;
+        }
+
+        for (let rot = 0; rot < 4; rot++){
+            let move = {
+                x: pos_x,
+                y: pos_y,
+                r: rot,
+            };
+            if(rot != 0){
+                this.moves.push(move);
+            }
+            cell.rotation = rot;
+            if(this.isSolved()){
+                this.solved = true;
+                console.log(...this.moves);
+                return;
+            }else{
+                cell.visited = true;
+                let o_x = [1, 0, -1, 0];
+                let o_y = [0, 1, 0, -1];
+                for (let i = 0; i < 4; i++){
+                    let new_x = pos_x + o_x[i];
+                    let new_y = pos_y + o_y[i];
+                    this.solve(new_x, new_y);
+                }
+                cell.visited = false;
+            }
+            if(rot != 0){
+                this.moves.pop();
+            }
+            cell.rotation = 0;
+        }
+    }
+
+    private isSolved(): boolean{
+        for (let j = 0; j < this.y; j++){
+            for (let i = 0; i < this.x; i++){
+                let tile = this.tiles[j][i];
+                if(!tile.isConnected()){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
 
@@ -39,6 +98,7 @@ export class Tile {
     public static readonly lineWidth: number = 7;
     public grid: Grid = null;
     public rotation: number = 0;
+    public visited: boolean = false;
     //directions follow the cartesian coordinates
     //directions[0] mean the positive x axis
     //directions[1] mean the positive y axis

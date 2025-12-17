@@ -3,8 +3,10 @@ import { Tile, Grid } from "./types";
 Math.fmod = function (a,b) { return Number((a - (Math.floor(a / b) * b)).toPrecision(8)); };
 
 async function loadData() {
-    const res = await fetch("/game/table/5");
+    const res = await fetch("/game/table/");
     const data: any = await res.json();
+
+    console.log("spoj: data",data);
 
     const output = document.getElementById("output");
     if (output) {
@@ -24,6 +26,9 @@ async function loadData() {
         canvas.height = data.height * Tile.squareSize;
 
         grid.draw(ctx);
+
+        grid.solved = false;
+        grid.solve(0,0);
     }
 }
 

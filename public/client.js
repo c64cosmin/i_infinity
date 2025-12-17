@@ -4,12 +4,15 @@ var Grid = class {
     this.x = 0;
     this.y = 0;
     this.tiles = [];
+    this.moves = [];
+    this.solved = false;
     this.x = data.width;
     this.y = data.height;
     for (let j = 0; j < this.y; j++) {
       let v = [];
       for (let i = 0; i < this.x; i++) {
-        let t = new Tile(i, j, data.tiles[i][j]);
+        let tile = data.tiles[j][i];
+        let t = new Tile(i, j, tile.config);
         t.grid = this;
         v.push(t);
       }
@@ -25,9 +28,62 @@ var Grid = class {
   draw(ctx) {
     for (let j = 0; j < this.y; j++) {
       for (let i = 0; i < this.x; i++) {
-        this.tiles[i][j].draw(ctx);
+        this.tiles[j][i].draw(ctx);
       }
     }
+  }
+  solve(pos_x, pos_y) {
+    if (this.solved) {
+      return;
+    }
+    let cell = this.getCell(pos_x, pos_y);
+    if (cell === null) {
+      return;
+    }
+    if (cell.visited) {
+      return;
+    }
+    for (let rot = 0; rot < 4; rot++) {
+      let move = {
+        x: pos_x,
+        y: pos_y,
+        r: rot
+      };
+      if (rot != 0) {
+        this.moves.push(move);
+      }
+      cell.rotation = rot;
+      if (this.isSolved()) {
+        this.solved = true;
+        console.log(...this.moves);
+        return;
+      } else {
+        cell.visited = true;
+        let o_x = [1, 0, -1, 0];
+        let o_y = [0, 1, 0, -1];
+        for (let i = 0; i < 4; i++) {
+          let new_x = pos_x + o_x[i];
+          let new_y = pos_y + o_y[i];
+          this.solve(new_x, new_y);
+        }
+        cell.visited = false;
+      }
+      if (rot != 0) {
+        this.moves.pop();
+      }
+      cell.rotation = 0;
+    }
+  }
+  isSolved() {
+    for (let j = 0; j < this.y; j++) {
+      for (let i = 0; i < this.x; i++) {
+        let tile = this.tiles[j][i];
+        if (!tile.isConnected()) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 };
 var Tile = class _Tile {
@@ -41,6 +97,7 @@ var Tile = class _Tile {
     this.directions = directions;
     this.grid = null;
     this.rotation = 0;
+    this.visited = false;
   }
   static {
     this.squareSize = 64;
@@ -232,8 +289,9 @@ Math.fmod = function(a, b) {
   return Number((a - Math.floor(a / b) * b).toPrecision(8));
 };
 async function loadData() {
-  const res = await fetch("/game/table/5");
+  const res = await fetch("/game/table/");
   const data = await res.json();
+  console.log("spoj: data", data);
   const output = document.getElementById("output");
   if (output) {
     output.textContent = "";
@@ -246,6 +304,8 @@ async function loadData() {
     canvas.width = data.width * Tile.squareSize;
     canvas.height = data.height * Tile.squareSize;
     grid.draw(ctx);
+    grid.solved = false;
+    grid.solve(0, 0);
   }
 }
 loadData();
