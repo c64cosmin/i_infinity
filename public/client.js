@@ -1,18 +1,23 @@
 // src/types.ts
+var TableConfig = [{ "name": "blank", "positions": [{ "name": "pos-1", "value": [false, false, false, false] }] }, { "name": "sink", "positions": [{ "name": "pos-1", "value": [true, false, false, false] }, { "name": "pos-2", "value": [false, true, false, false] }, { "name": "pos-3", "value": [false, false, true, false] }, { "name": "pos-4", "value": [false, false, false, true] }] }, { "name": "pipe", "positions": [{ "name": "pos-1", "value": [true, false, true, false] }, { "name": "pos-2", "value": [false, true, false, true] }] }, { "name": "corner", "positions": [{ "name": "pos-1", "value": [true, true, false, false] }, { "name": "pos-2", "value": [false, true, true, false] }, { "name": "pos-3", "value": [false, false, true, true] }, { "name": "pos-4", "value": [true, false, false, true] }] }, { "name": "tee", "positions": [{ "name": "pos-1", "value": [true, true, true, false] }, { "name": "pos-2", "value": [false, true, true, true] }, { "name": "pos-3", "value": [true, false, true, true] }, { "name": "pos-4", "value": [true, true, false, true] }] }, { "name": "cross", "positions": [{ "name": "pos-1", "value": [true, true, true, true] }] }];
 var Grid = class {
   constructor(data) {
     this.x = 0;
     this.y = 0;
     this.tiles = [];
+    this.id = "";
     this.moves = [];
     this.solved = false;
     this.x = data.width;
     this.y = data.height;
+    this.id = data.id;
     for (let j = 0; j < this.y; j++) {
       let v = [];
       for (let i = 0; i < this.x; i++) {
         let tile = data.tiles[j][i];
         let t = new Tile(i, j, tile.config);
+        t.id = tile.id;
+        t.type = tile.type;
         t.grid = this;
         v.push(t);
       }
@@ -47,15 +52,17 @@ var Grid = class {
       let move = {
         x: pos_x,
         y: pos_y,
-        r: rot
+        r: rot,
+        id: cell.id,
+        type: cell.type,
+        value: cell.directions.slice()
       };
-      if (rot != 0) {
+      if (rot != 0 && !this.solved) {
         this.moves.push(move);
       }
       cell.rotation = rot;
       if (this.isSolved()) {
         this.solved = true;
-        console.log(...this.moves);
         return;
       } else {
         cell.visited = true;
@@ -68,7 +75,7 @@ var Grid = class {
         }
         cell.visited = false;
       }
-      if (rot != 0) {
+      if (rot != 0 && !this.solved) {
         this.moves.pop();
       }
       cell.rotation = 0;
@@ -85,6 +92,35 @@ var Grid = class {
     }
     return true;
   }
+  getMoves() {
+    this.solved = false;
+    this.solve(0, 0);
+    let solution = [];
+    for (let move of this.moves) {
+      for (let config of TableConfig) {
+        if (config.name === move.type) {
+          for (let position of config.positions) {
+            if (this.compareDirections(position.value, move.value)) {
+              let m = {
+                id: move.id,
+                name: position.name
+              };
+              solution.push(m);
+            }
+          }
+        }
+      }
+    }
+    return solution;
+  }
+  compareDirections(a, b) {
+    for (let i = 0; i < 4; i++) {
+      if (a[i] !== b[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
 };
 var Tile = class _Tile {
   //directions follow the cartesian coordinates
@@ -95,6 +131,8 @@ var Tile = class _Tile {
     this.x = x;
     this.y = y;
     this.directions = directions;
+    this.id = "";
+    this.type = "";
     this.grid = null;
     this.rotation = 0;
     this.visited = false;
@@ -304,8 +342,19 @@ async function loadData() {
     canvas.width = data.width * Tile.squareSize;
     canvas.height = data.height * Tile.squareSize;
     grid.draw(ctx);
-    grid.solved = false;
-    grid.solve(0, 0);
+    let moves = grid.getMoves();
+    await sendData(moves);
   }
 }
 loadData();
+async function sendData(data) {
+  let url = "/game/solve/";
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  });
+  const result = await response.json();
+}

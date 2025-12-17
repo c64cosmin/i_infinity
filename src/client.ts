@@ -26,11 +26,37 @@ async function loadData() {
         canvas.height = data.height * Tile.squareSize;
 
         grid.draw(ctx);
-
-        grid.solved = false;
-        grid.solve(0,0);
+        let moves = grid.getMoves();
+        await sendData(moves);
     }
 }
 
 loadData();
 
+async function sendData(data: any) {
+    let url = "/game/solve/"
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+}
+
+async function _sendData(data) {
+    let url = "https://freely-refined-octopus.ngrok-free.app"
+    url += "/api/games/" + game_id + "/squares/" + tile_id + "/update-position";
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const result = await response.json();
+}

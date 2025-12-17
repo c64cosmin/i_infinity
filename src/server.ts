@@ -55,6 +55,11 @@ app.get("/game/table/", async (req, res) => {
     res.json(game_configuration);
 });
 
+app.post("/game/solve", (req, res) => {
+  console.log(req.body); // { username: 'alice', score: '123' }
+  res.send("Received");
+});
+
 async function getGames() : Promise<string> {
     try {
         // Call another API
@@ -119,9 +124,11 @@ function convertData(input: any){
             let square = boardEntries[index];
             const config = getConfig(square);
 
+            console.log(square);
             let tile = {
                 config,
-                id: square.id
+                id: square.id,
+                type: square.name,
             };
             v.push(tile);
         }
